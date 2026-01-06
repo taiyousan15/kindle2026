@@ -8,8 +8,8 @@ AIエージェント、MCPツール、マーケティングスキルを完全統
 
 | Component | Count | Description |
 |-----------|-------|-------------|
-| **Agents** | 75 | AIT42 + Miyabi統合エージェント |
-| **Skills** | 56 | マーケティング・クリエイティブ・インフラ |
+| **Agents** | 81 | AIT42 + Miyabi統合エージェント |
+| **Skills** | 67 | マーケティング・クリエイティブ・インフラ |
 | **Commands** | 74 | ショートカットコマンド |
 | **MCP Servers** | 32 | 外部サービス連携 |
 | **MCP Tools** | 227 | 自動化ツール群 |
@@ -18,7 +18,7 @@ AIエージェント、MCPツール、マーケティングスキルを完全統
 
 ```
 taisun_v2/.claude/
-├── agents/              # 75 統合エージェント
+├── agents/              # 81 統合エージェント
 ├── commands/            # 74 コマンド
 ├── skills/              # 56 スキル
 ├── memory/              # 学習・統計システム
@@ -31,13 +31,21 @@ taisun_v2/.claude/
 └── settings.json        # 設定
 ```
 
-## Agent Categories (75 Agents)
+## Agent Categories (81 Agents)
 
-### Coordinators (4)
+### Coordinators (5)
 - `ait42-coordinator` - メインオーケストレーター
 - `ait42-coordinator-fast` - 高速O(1)選択
 - `omega-aware-coordinator` - Ω関数理論
 - `self-healing-coordinator` - 自己修復
+- `initialization-orchestrator` - 環境セットアップ統合
+
+### Diagnostics & Recovery (5) 🆕
+- `system-diagnostician` - プロアクティブシステム診断
+- `error-recovery-planner` - エラー回復計画
+- `dependency-validator` - 依存関係検証
+- `log-analyzer` - ログ解析・パターン検出
+- `environment-doctor` - 環境診断・修復（初心者向け）
 
 ### Architecture & Design (6)
 - `system-architect`, `api-designer`, `database-designer`
@@ -84,7 +92,7 @@ taisun_v2/.claude/
 ### Specialized Tools (16+)
 - Data analyst, Researcher, Automation architect, etc.
 
-## Skill Categories (51 Skills)
+## Skill Categories (67 Skills)
 
 ### Marketing & Sales (15)
 | Skill | Description |
@@ -100,7 +108,7 @@ taisun_v2/.claude/
 | `mendan-lp` | 面談LP |
 | `funnel-builder` | ファネル構築 |
 | `customer-support` | カスタマーサポート |
-| `tommy-style` | トミースタイル |
+| `taiyo-style` | 太陽スタイル |
 | `education-framework` | 6つの教育要素 |
 | `line-marketing` | LINEマーケティング |
 | `sales-systems` | セールスシステム |
@@ -231,6 +239,15 @@ taisun_v2/.claude/
 # 状態確認
 /miyabi-status
 /mcp-health
+```
+
+### 環境診断・トラブルシューティング（初心者向け）
+```
+「環境を診断して」           → environment-doctor が自動実行
+「エラーログを分析して」      → log-analyzer が原因特定
+「依存関係をチェックして」    → dependency-validator が検証
+「このエラーの修復方法は？」  → error-recovery-planner が提案
+「システムの状態を確認」      → system-diagnostician が診断
 ```
 
 ## Guidelines
