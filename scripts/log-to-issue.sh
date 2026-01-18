@@ -4,7 +4,7 @@
 set -e
 
 # 設定
-REPO="taiyousan15/testikeda"
+REPO="taiyousan15/taisun_agent"
 LOG_DIR="${LOG_DIR:-./logs}"
 TIMESTAMP=$(date '+%Y-%m-%d %H:%M:%S')
 DATE=$(date '+%Y-%m-%d')
