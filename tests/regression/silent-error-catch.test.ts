@@ -8,29 +8,45 @@
  * This test ensures the mistake does not recur.
  */
 
+import * as fs from 'fs';
+import * as path from 'path';
+
+const SOURCE_PATH = path.join(__dirname, '../../src/proxy-mcp/browser/cdp/session.ts');
+const source = fs.readFileSync(SOURCE_PATH, 'utf-8');
+
 describe('Regression: Silent Error Catch', () => {
   /**
    * Symptom: catch ブロックでエラーを握りつぶし、デバッグ困難
    * Fix: console.debug でエラーメッセージをログ出力
    */
   it('should not exhibit the original symptom', () => {
-    // TODO: Implement regression test
-    // Prevention checks:
-    // - 空の catch ブロックは禁止
-    // - 最低でも debug レベルでエラーをログする
-
-    // Example assertions:
-    // expect(result.success).toBe(false); // Not true on error
-    // expect(spawnSync).toHaveBeenCalled(); // Not execSync
-
-    expect(true).toBe(true); // Placeholder - replace with actual test
+    // 空の catch ブロック（catch (e) {} や catch { } ）が存在しないことを検証
+    const emptyCatchBlock = /catch\s*(\([^)]*\))?\s*\{\s*\}/;
+    expect(source).not.toMatch(emptyCatchBlock);
   });
 
   it('should follow the prevention guidelines', () => {
-    // TODO: Verify prevention measures are in place
-    // 1. 空の catch ブロックは禁止
-    // 2. 最低でも debug レベルでエラーをログする
+    // 全ての catch ブロックがエラーを適切に処理していることを検証
+    // 各 catch ブロックには以下のいずれかが必要:
+    //   - console.debug / console.error / console.warn によるログ出力
+    //   - throw によるエラー再送出（握りつぶしではない）
+    const catchRegex = /catch\s*(\([^)]*\))?\s*\{/g;
+    let match: RegExpExecArray | null;
+    const catchPositions: number[] = [];
 
-    expect(true).toBe(true); // Placeholder - replace with actual test
+    while ((match = catchRegex.exec(source)) !== null) {
+      catchPositions.push(match.index);
+    }
+
+    expect(catchPositions.length).toBeGreaterThan(0);
+
+    for (const pos of catchPositions) {
+      // catch キーワード位置から次の200文字を取得してブロック内容を検査
+      const snippet = source.substring(pos, pos + 500);
+      const hasLogging = /console\.(debug|error|warn)\(/.test(snippet);
+      const hasThrow = /\bthrow\b/.test(snippet);
+      // ログ出力またはエラー再送出のいずれかがあれば、エラーを握りつぶしていない
+      expect(hasLogging || hasThrow).toBe(true);
+    }
   });
 });

@@ -8,29 +8,47 @@
  * This test ensures the mistake does not recur.
  */
 
+import * as fs from 'fs';
+import * as path from 'path';
+
+const SOURCE_PATH = path.join(__dirname, '../../src/proxy-mcp/ops/schedule/runner.ts');
+const source = fs.readFileSync(SOURCE_PATH, 'utf-8');
+
 describe('Regression: Success True On Error', () => {
   /**
    * Symptom: オプショナル依存エラー時に `success: true` を返していた
    * Fix: `success: false, skipped: true` に変更
    */
   it('should not exhibit the original symptom', () => {
-    // TODO: Implement regression test
-    // Prevention checks:
-    // - catch ブロックで success: true を返す前に、本当に成功なのか確認する
-    // - オプショナル依存のエラーは skipped フラグで区別する
+    // catch ブロック内に success: true が存在しないことを検証
+    // catch ブロックの中身を抽出して確認
+    const catchBlockRegex = /catch\s*(\([^)]*\))?\s*\{([\s\S]*?)\n\s{4}\}/g;
+    let match: RegExpExecArray | null;
+    const catchBodies: string[] = [];
 
-    // Example assertions:
-    // expect(result.success).toBe(false); // Not true on error
-    // expect(spawnSync).toHaveBeenCalled(); // Not execSync
+    while ((match = catchBlockRegex.exec(source)) !== null) {
+      catchBodies.push(match[2]);
+    }
 
-    expect(true).toBe(true); // Placeholder - replace with actual test
+    expect(catchBodies.length).toBeGreaterThan(0);
+
+    for (const body of catchBodies) {
+      // catch ブロック内で success: true を返していないことを検証
+      expect(body).not.toMatch(/success:\s*true/);
+    }
   });
 
   it('should follow the prevention guidelines', () => {
-    // TODO: Verify prevention measures are in place
-    // 1. catch ブロックで success: true を返す前に、本当に成功なのか確認する
-    // 2. オプショナル依存のエラーは skipped フラグで区別する
+    // skipped: true パターンが存在することを検証（オプショナル依存のエラー区別）
+    expect(source).toMatch(/skipped:\s*true/);
 
-    expect(true).toBe(true); // Placeholder - replace with actual test
+    // success: false が全てのエラーパスで使われていることを検証
+    // catch ブロック内およびエラー系 return で success: false があること
+    expect(source).toMatch(/success:\s*false/);
+
+    // エラー系の return 文で success: false が使われている箇所が複数あることを検証
+    const successFalseMatches = source.match(/success:\s*false/g);
+    expect(successFalseMatches).not.toBeNull();
+    expect(successFalseMatches!.length).toBeGreaterThanOrEqual(2);
   });
 });
