@@ -7,7 +7,21 @@ import * as fs from 'fs';
 import * as path from 'path';
 import type { WorkflowDefinition } from './types';
 
-const WORKFLOWS_DIR = path.join(process.cwd(), 'config', 'workflows');
+let WORKFLOWS_DIR = path.join(process.cwd(), 'config', 'workflows');
+
+/**
+ * Set custom workflows directory (for testing)
+ */
+export function setWorkflowsDir(dir: string): void {
+  WORKFLOWS_DIR = dir;
+}
+
+/**
+ * Reset workflows directory to default (for testing cleanup)
+ */
+export function resetWorkflowsDir(): void {
+  WORKFLOWS_DIR = path.join(process.cwd(), 'config', 'workflows');
+}
 
 /**
  * Load all workflow definitions
@@ -32,7 +46,18 @@ export function loadAllWorkflows(): Map<string, WorkflowDefinition> {
 
     const filePath = path.join(WORKFLOWS_DIR, file);
     try {
+      // Check if file still exists (might have been deleted by another test)
+      if (!fs.existsSync(filePath)) {
+        continue;
+      }
+
       const content = fs.readFileSync(filePath, 'utf-8');
+
+      // Skip empty files (might be in the process of being written)
+      if (!content || content.trim() === '') {
+        continue;
+      }
+
       const definition = JSON.parse(content) as WorkflowDefinition;
 
       // Basic validation
@@ -40,7 +65,11 @@ export function loadAllWorkflows(): Map<string, WorkflowDefinition> {
 
       workflows.set(definition.id, definition);
     } catch (error) {
-      const err = error as Error;
+      const err = error as NodeJS.ErrnoException;
+      // Skip files that were deleted or are being modified (ENOENT, empty JSON, etc.)
+      if (err.code === 'ENOENT' || err.message.includes('Unexpected end of JSON input')) {
+        continue;
+      }
       throw new Error(
         `Failed to load workflow definition ${file}: ${err.message}\n` +
           `ワークフロー定義の読み込みに失敗: ${file}`
